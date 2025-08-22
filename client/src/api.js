@@ -6,25 +6,25 @@ export async function healthCheck() {
   return res.json();
 }
 
-export async function getGameState() {
-  const res = await fetch(`${API_BASE}/game`);
+export async function getGameState(gameId) {
+  const res = await fetch(`${API_BASE}/game/${gameId}`);
   return res.json();
 }
 
-export async function createGame() {
+export async function createGame(hostName, mode = 'junior') {
   const res = await fetch(`${API_BASE}/game`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({})
+    body: JSON.stringify({ hostName, mode })
   });
   return res.json();
 }
 
-export async function joinGame() {
+export async function joinGame(gameId, playerName) {
   const res = await fetch(`${API_BASE}/game/join`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({})
+    body: JSON.stringify({ gameId, playerName })
   });
   return res.json();
 }
