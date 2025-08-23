@@ -1,7 +1,41 @@
 const express = require('express');
 const router = express.Router();
 
-const { createGame, joinGame, getGame, startGame, joinQuickPlay, createPrivateGame, joinGameByCode } = require('./gameState');
+const { createGame, joinGame, getGame, startGame, joinQuickPlay, createPrivateGame, joinGameByCode, playerCommit, playerPass, playerRecalculate, setPlayerReady } = require('./gameState');
+// Set player ready status
+router.post('/game/ready', (req, res) => {
+  const { gameId, playerName, ready } = req.body;
+  if (!gameId || !playerName || typeof ready === 'undefined') return res.status(400).json({ error: 'Missing required fields' });
+  const game = setPlayerReady(Number(gameId), playerName, ready);
+  if (!game) return res.status(404).json({ error: 'Game or player not found' });
+  res.json(game);
+});
+// Player Commit
+router.post('/game/commit', (req, res) => {
+  const { gameId, playerName, cards, equation } = req.body;
+  if (!gameId || !playerName || !cards || !equation) return res.status(400).json({ error: 'Missing required fields' });
+  const game = playerCommit(Number(gameId), playerName, cards, equation);
+  if (!game) return res.status(404).json({ error: 'Game not found or not started' });
+  res.json(game);
+});
+
+// Player Pass
+router.post('/game/pass', (req, res) => {
+  const { gameId, playerName } = req.body;
+  if (!gameId || !playerName) return res.status(400).json({ error: 'Missing required fields' });
+  const game = playerPass(Number(gameId), playerName);
+  if (!game) return res.status(404).json({ error: 'Game not found or not started' });
+  res.json(game);
+});
+
+// Player Recalculate
+router.post('/game/recalculate', (req, res) => {
+  const { gameId, playerName, discardCards } = req.body;
+  if (!gameId || !playerName || !discardCards) return res.status(400).json({ error: 'Missing required fields' });
+  const game = playerRecalculate(Number(gameId), playerName, discardCards);
+  if (!game) return res.status(404).json({ error: 'Game not found or not started' });
+  res.json(game);
+});
 // Quick Play matchmaking
 router.post('/game/quickplay', (req, res) => {
   const { playerName } = req.body;

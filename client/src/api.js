@@ -1,3 +1,37 @@
+export async function setReady(gameId, playerName, ready) {
+  const res = await fetch(`${API_BASE}/game/ready`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId, playerName, ready })
+  });
+  return res.json();
+}
+export async function commitAction(gameId, playerName, cards, equation) {
+  const res = await fetch(`${API_BASE}/game/commit`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId, playerName, cards, equation })
+  });
+  return res.json();
+}
+
+export async function passAction(gameId, playerName) {
+  const res = await fetch(`${API_BASE}/game/pass`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId, playerName })
+  });
+  return res.json();
+}
+
+export async function recalculateAction(gameId, playerName, discardCards) {
+  const res = await fetch(`${API_BASE}/game/recalculate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gameId, playerName, discardCards })
+  });
+  return res.json();
+}
 export async function quickPlay(playerName) {
   const res = await fetch(`${API_BASE}/game/quickplay`, {
     method: 'POST',

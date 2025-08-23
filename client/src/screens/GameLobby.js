@@ -1,11 +1,12 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { createGame, joinGame, getGameState, startGame, createPrivateGame, joinGameByCode } from '../api';
-import { useLocation } from 'react-router-dom';
+import { createGame, joinGame, getGameState, startGame, createPrivateGame, joinGameByCode, setReady } from '../api';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const GameLobby = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [hostName, setHostName] = useState(location.state?.playerName || '');
   const [mode, setMode] = useState('junior');
   const [gameId, setGameId] = useState(location.state?.game?.id || '');
@@ -13,6 +14,24 @@ const GameLobby = () => {
   const [game, setGame] = useState(location.state?.game || null);
   const [error, setError] = useState('');
   const [roomCode, setRoomCode] = useState('');
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    if (game && game.state === 'started') {
+      navigate('/game', { state: { gameId, playerName } });
+    }
+  }, [game, gameId, playerName, navigate]);
+
+  const handleSetReady = async (ready) => {
+    setError('');
+    try {
+      const result = await setReady(gameId, playerName, ready);
+      setGame(result);
+      setIsReady(ready);
+    } catch (e) {
+      setError('Failed to set ready');
+    }
+  };
 
   const handleStartGame = async () => {
     setError('');
@@ -82,8 +101,20 @@ const GameLobby = () => {
         <button onClick={handleGetGame}>Get State</button>
       </div>
       <div>
+        <h3>Ready Status</h3>
+        <button onClick={() => handleSetReady(true)} disabled={isReady}>Ready</button>
+        <button onClick={() => handleSetReady(false)} disabled={!isReady}>Not Ready</button>
+        {game && game.players && (
+          <ul>
+            {game.players.map((p, idx) => (
+              <li key={idx}>{p.name} - {p.ready ? 'Ready' : 'Not Ready'}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div>
         <h3>Start Game</h3>
-        <button onClick={handleStartGame}>Start</button>
+        <button onClick={handleStartGame} disabled={!(game && game.players && game.players.length > 0 && game.players.every(p => p.ready))}>Start</button>
       </div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {game && (
