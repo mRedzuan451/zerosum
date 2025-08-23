@@ -1,15 +1,18 @@
 
 
-import React, { useState } from 'react';
-import { createGame, joinGame, getGameState, startGame } from '../api';
+import React, { useState, useEffect } from 'react';
+import { createGame, joinGame, getGameState, startGame, createPrivateGame, joinGameByCode } from '../api';
+import { useLocation } from 'react-router-dom';
 
 const GameLobby = () => {
-  const [hostName, setHostName] = useState('');
+  const location = useLocation();
+  const [hostName, setHostName] = useState(location.state?.playerName || '');
   const [mode, setMode] = useState('junior');
-  const [gameId, setGameId] = useState('');
-  const [playerName, setPlayerName] = useState('');
-  const [game, setGame] = useState(null);
+  const [gameId, setGameId] = useState(location.state?.game?.id || '');
+  const [playerName, setPlayerName] = useState(location.state?.playerName || '');
+  const [game, setGame] = useState(location.state?.game || null);
   const [error, setError] = useState('');
+  const [roomCode, setRoomCode] = useState('');
 
   const handleStartGame = async () => {
     setError('');
@@ -21,24 +24,26 @@ const GameLobby = () => {
     }
   };
 
-  const handleCreateGame = async () => {
+  const handleCreatePrivateGame = async () => {
     setError('');
     try {
-      const result = await createGame(hostName, mode);
+      const result = await createPrivateGame(hostName, mode);
       setGame(result);
       setGameId(result.id);
+      setRoomCode(result.roomCode);
     } catch (e) {
-      setError('Failed to create game');
+      setError('Failed to create private game');
     }
   };
 
-  const handleJoinGame = async () => {
+  const handleJoinGameByCode = async () => {
     setError('');
     try {
-      const result = await joinGame(gameId, playerName);
+      const result = await joinGameByCode(roomCode, playerName);
       setGame(result);
+      setGameId(result.id);
     } catch (e) {
-      setError('Failed to join game');
+      setError('Failed to join game by code');
     }
   };
 
@@ -56,19 +61,20 @@ const GameLobby = () => {
     <div>
       <h2>Game Lobby</h2>
       <div>
-        <h3>Create Game</h3>
+        <h3>Create Private Game</h3>
         <input placeholder="Host Name" value={hostName} onChange={e => setHostName(e.target.value)} />
         <select value={mode} onChange={e => setMode(e.target.value)}>
           <option value="junior">Junior</option>
           <option value="pro">Pro</option>
         </select>
-        <button onClick={handleCreateGame}>Create</button>
+        <button onClick={handleCreatePrivateGame}>Create Private Game</button>
+        {roomCode && <p>Room Code: <b>{roomCode}</b></p>}
       </div>
       <div>
-        <h3>Join Game</h3>
-        <input placeholder="Game ID" value={gameId} onChange={e => setGameId(e.target.value)} />
+        <h3>Join Game by Room Code</h3>
+        <input placeholder="Room Code" value={roomCode} onChange={e => setRoomCode(e.target.value)} />
         <input placeholder="Player Name" value={playerName} onChange={e => setPlayerName(e.target.value)} />
-        <button onClick={handleJoinGame}>Join</button>
+        <button onClick={handleJoinGameByCode}>Join by Code</button>
       </div>
       <div>
         <h3>Get Game State</h3>

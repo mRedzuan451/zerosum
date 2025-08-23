@@ -1,3 +1,29 @@
+export async function quickPlay(playerName) {
+  const res = await fetch(`${API_BASE}/game/quickplay`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ playerName })
+  });
+  return res.json();
+}
+
+export async function createPrivateGame(hostName, mode = 'junior') {
+  const res = await fetch(`${API_BASE}/game/private`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hostName, mode })
+  });
+  return res.json();
+}
+
+export async function joinGameByCode(roomCode, playerName) {
+  const res = await fetch(`${API_BASE}/game/joincode`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ roomCode, playerName })
+  });
+  return res.json();
+}
 export async function startGame(gameId) {
   const res = await fetch(`${API_BASE}/game/start`, {
     method: 'POST',
