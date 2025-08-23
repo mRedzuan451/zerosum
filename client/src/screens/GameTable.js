@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { commitAction, passAction, recalculateAction } from '../api';
 
 
-const testCards = [1, 2, 3, 4, 5, 6, 7];
+// Remove testCards, use actual hand from backend
 
 const cardStyle = {
   display: 'inline-block',
@@ -21,10 +23,12 @@ const cardStyle = {
 
 
 const GameTable = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [selectedCards, setSelectedCards] = useState([]);
   const [equation, setEquation] = useState('');
-  const [gameId, setGameId] = useState('');
-  const [playerName, setPlayerName] = useState('');
+  const [gameId, setGameId] = useState(location.state?.gameId || '');
+  const [playerName, setPlayerName] = useState(location.state?.playerName || '');
   const [result, setResult] = useState('');
   const [game, setGame] = useState(null);
   // Poll game state every 2 seconds for real-time opponent status
@@ -38,7 +42,7 @@ const GameTable = () => {
       } catch (e) {
         // Ignore errors during polling
       }
-    }, 2000);
+    }, 1000); // 1 second interval
     return () => clearInterval(interval);
   }, [gameId]);
 
@@ -68,30 +72,48 @@ const GameTable = () => {
     <div>
       <h2 style={{ color: '#0ff', textShadow: '0 0 8px #0ff' }}>Game Table</h2>
       <div>
-        {testCards.map((num, idx) => (
-          <div
-            key={idx}
-            style={{
-              ...cardStyle,
-              background: selectedCards.includes(num) ? '#0ff' : '#222',
-              color: selectedCards.includes(num) ? '#222' : '#0ff',
-              cursor: 'pointer',
-            }}
-            onClick={() => handleCardClick(num)}
-          >
-            {num}
-          </div>
-        ))}
+        <h3 style={{ color: '#fff' }}>Your Hand</h3>
+        {game && game.players && playerName && (
+          game.players.find(p => p.name === playerName)?.hand?.length > 0 ? (
+            <div>
+              {game.players.find(p => p.name === playerName).hand.map((num, idx) => (
+                <div
+                  key={idx}
+                  style={{
+                    ...cardStyle,
+                    background: selectedCards.includes(num) ? '#0ff' : '#222',
+                    color: selectedCards.includes(num) ? '#222' : '#0ff',
+                    cursor: 'pointer',
+                    display: 'inline-block',
+                  }}
+                  onClick={() => handleCardClick(num)}
+                >
+                  {num}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ color: '#f00' }}>No cards in hand.</div>
+          )
+        )}
       </div>
       <div style={{ marginTop: 20 }}>
-        <input placeholder="Game ID" value={gameId} onChange={e => setGameId(e.target.value)} style={{ marginRight: 10 }} />
-        <input placeholder="Player Name" value={playerName} onChange={e => setPlayerName(e.target.value)} style={{ marginRight: 10 }} />
         <input placeholder="Equation" value={equation} onChange={e => setEquation(e.target.value)} />
       </div>
       <div style={{ marginTop: 20 }}>
         <button onClick={handleCommit} style={{ marginRight: 10 }}>Commit</button>
         <button onClick={handlePass} style={{ marginRight: 10 }}>Pass</button>
-        <button onClick={handleRecalculate}>Recalculate</button>
+        <button onClick={handleRecalculate} style={{ marginRight: 10 }}>Recalculate</button>
+        <button
+          onClick={() => {
+            if (window.confirm('Are you sure you want to exit the game?')) {
+              navigate('/');
+            }
+          }}
+          style={{ background: '#f00', color: '#fff', marginLeft: 20, padding: '8px 16px', borderRadius: '8px', border: 'none', fontWeight: 'bold', cursor: 'pointer' }}
+        >
+          Exit Game
+        </button>
       </div>
       {/* Opponent status */}
       {game && game.players && (

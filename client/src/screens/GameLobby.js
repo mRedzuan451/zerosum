@@ -32,7 +32,7 @@ const GameLobby = () => {
       } catch (e) {
         // Ignore errors during polling
       }
-    }, 2000);
+    }, 1000); // 1 second interval
     return () => clearInterval(interval);
   }, [gameId]);
 
