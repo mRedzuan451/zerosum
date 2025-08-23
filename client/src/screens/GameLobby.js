@@ -1,5 +1,7 @@
+
+
 import React, { useState } from 'react';
-import { createGame, joinGame, getGameState } from '../api';
+import { createGame, joinGame, getGameState, startGame } from '../api';
 
 const GameLobby = () => {
   const [hostName, setHostName] = useState('');
@@ -8,6 +10,16 @@ const GameLobby = () => {
   const [playerName, setPlayerName] = useState('');
   const [game, setGame] = useState(null);
   const [error, setError] = useState('');
+
+  const handleStartGame = async () => {
+    setError('');
+    try {
+      const result = await startGame(gameId);
+      setGame(result);
+    } catch (e) {
+      setError('Failed to start game');
+    }
+  };
 
   const handleCreateGame = async () => {
     setError('');
@@ -63,6 +75,10 @@ const GameLobby = () => {
         <input placeholder="Game ID" value={gameId} onChange={e => setGameId(e.target.value)} />
         <button onClick={handleGetGame}>Get State</button>
       </div>
+      <div>
+        <h3>Start Game</h3>
+        <button onClick={handleStartGame}>Start</button>
+      </div>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {game && (
         <div>
@@ -72,6 +88,6 @@ const GameLobby = () => {
       )}
     </div>
   );
-};
+}
 
 export default GameLobby;

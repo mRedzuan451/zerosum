@@ -23,8 +23,16 @@ function joinGame(gameId, playerName) {
   return game;
 }
 
+function startGame(gameId) {
+  const game = games[gameId];
+  if (!game || game.state !== 'waiting') return null;
+  game.state = 'started';
+  game.started = Date.now();
+  return game;
+}
+
 function getGame(gameId) {
   return games[gameId] || null;
 }
 
-module.exports = { games, createGame, joinGame, getGame };
+module.exports = { games, createGame, joinGame, getGame, startGame };

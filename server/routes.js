@@ -1,7 +1,15 @@
 const express = require('express');
 const router = express.Router();
 
-const { createGame, joinGame, getGame } = require('./gameState');
+const { createGame, joinGame, getGame, startGame } = require('./gameState');
+// Start game
+router.post('/game/start', (req, res) => {
+  const { gameId } = req.body;
+  if (!gameId) return res.status(400).json({ error: 'gameId required' });
+  const game = startGame(Number(gameId));
+  if (!game) return res.status(404).json({ error: 'Game not found or already started' });
+  res.json(game);
+});
 
 // Health check
 router.get('/health', (req, res) => {
