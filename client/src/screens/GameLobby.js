@@ -22,6 +22,20 @@ const GameLobby = () => {
     }
   }, [game, gameId, playerName, navigate]);
 
+  // Poll game state every 2 seconds for real-time updates
+  useEffect(() => {
+    if (!gameId) return;
+    const interval = setInterval(async () => {
+      try {
+        const result = await getGameState(gameId);
+        setGame(result);
+      } catch (e) {
+        // Ignore errors during polling
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [gameId]);
+
   const handleSetReady = async (ready) => {
     setError('');
     try {

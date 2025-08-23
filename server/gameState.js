@@ -105,6 +105,19 @@ function playerRecalculate(gameId, playerName, discardCards) {
 
 function getGame(gameId) {
   return games[gameId] || null;
+
 }
 
-module.exports = { games, createGame, joinGame, getGame, startGame, createPrivateGame, joinGameByCode };
+module.exports = {
+  games,
+  createGame,
+  joinGame,
+  getGame,
+  startGame,
+  createPrivateGame,
+  joinGameByCode,
+  setPlayerReady,
+  playerCommit,
+  playerPass,
+  playerRecalculate
+};
