@@ -23,6 +23,9 @@ const cardStyle = {
 
 
 const GameTable = () => {
+  // Recalculate discard selection state
+  const [recalcMode, setRecalcMode] = useState(false);
+  const [discardCards, setDiscardCards] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedCards, setSelectedCards] = useState([]);
@@ -85,15 +88,49 @@ const GameTable = () => {
   };
 
   const handleRecalculate = async () => {
-  if (!gameId || !playerName) return alert('Fill all fields');
-  if (selectedCards.length !== 2) return alert('You must select exactly 2 cards to discard for recalculate.');
-  const res = await recalculateAction(gameId, playerName, selectedCards);
-  setResult(JSON.stringify(res, null, 2));
+    // Start recalculate mode, prompt for discard selection
+    setRecalcMode(true);
+    setDiscardCards([]);
+  };
+
+  const handleConfirmDiscard = async () => {
+    if (!gameId || !playerName) return alert('Fill all fields');
+    if (discardCards.length !== 2) return alert('You must select exactly 2 cards to discard.');
+    const res = await recalculateAction(gameId, playerName, discardCards);
+    setResult(JSON.stringify(res, null, 2));
+    // Immediately fetch latest game state for instant hand update
+    try {
+      const fetchRes = await fetch(`http://localhost:3001/api/game/${gameId}`);
+      const data = await fetchRes.json();
+      setGame(data);
+    } catch (e) {}
+    setRecalcMode(false);
+    setDiscardCards([]);
   };
 
   return (
     <div>
       <h2 style={{ color: '#0ff', textShadow: '0 0 8px #0ff' }}>Game Table</h2>
+      {/* Target Value Display */}
+      {game && (
+        <div style={{
+          background: '#111',
+          color: '#0ff',
+          border: '2px solid #0ff',
+          borderRadius: '10px',
+          padding: '16px',
+          margin: '0 auto 24px auto',
+          maxWidth: '320px',
+          textAlign: 'center',
+          boxShadow: '0 0 10px #0ff',
+        }}>
+          <div style={{ fontSize: '1.2em', fontWeight: 'bold', marginBottom: 8 }}>Target Value</div>
+          <div style={{ fontSize: '2em', marginBottom: 8 }}>{game.targetValue}</div>
+          {game.targetEquation && (
+            <div style={{ fontSize: '1em', color: '#fff' }}>Equation: <b>{game.targetEquation}</b></div>
+          )}
+        </div>
+      )}
       {/* Calculation Result Box */}
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
         <div style={{
@@ -146,7 +183,9 @@ const GameTable = () => {
           game.players.find(p => p.name === playerName)?.hand?.length > 0 ? (
             <div>
               {game.players.find(p => p.name === playerName).hand.map((card, idx) => {
-                const isSelected = selectedCards.includes(idx);
+                // If in recalcMode, highlight discard selection
+                const isDiscard = recalcMode && discardCards.includes(idx);
+                const isSelected = !recalcMode && selectedCards.includes(idx);
                 return (
                   <div
                     key={idx}
@@ -157,9 +196,20 @@ const GameTable = () => {
                       border: card.type === 'operand' ? '2px dashed #ff0' : '2px solid #0ff',
                       cursor: 'pointer',
                       display: 'inline-block',
+                      position: 'relative',
+                      top: isDiscard ? '-16px' : '0',
+                      boxShadow: isDiscard ? '0 0 20px #f00' : (isSelected ? '0 0 10px #0ff' : ''),
                     }}
                     onClick={() => {
-                      setSelectedCards(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]);
+                      if (recalcMode) {
+                        setDiscardCards(prev => prev.includes(idx)
+                          ? prev.filter(i => i !== idx)
+                          : prev.length < 2 ? [...prev, idx] : prev);
+                      } else {
+                        setSelectedCards(prev => prev.includes(idx)
+                          ? prev.filter(i => i !== idx)
+                          : [...prev, idx]);
+                      }
                     }}
                   >
                     {card.value}
@@ -170,6 +220,41 @@ const GameTable = () => {
           ) : (
             <div style={{ color: '#f00' }}>No cards in hand.</div>
           )
+        )}
+        {/* Recalculate confirm UI */}
+        {recalcMode && (
+          <div style={{ marginTop: 16 }}>
+            <button
+              onClick={handleConfirmDiscard}
+              disabled={discardCards.length !== 2}
+              style={{
+                background: discardCards.length === 2 ? '#0ff' : '#888',
+                color: '#222',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 'bold',
+                cursor: discardCards.length === 2 ? 'pointer' : 'not-allowed',
+                marginRight: 10,
+              }}
+            >
+              Confirm Discard
+            </button>
+            <button
+              onClick={() => { setRecalcMode(false); setDiscardCards([]); }}
+              style={{
+                background: '#f00',
+                color: '#fff',
+                padding: '8px 16px',
+                borderRadius: '8px',
+                border: 'none',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
         )}
       </div>
       <div style={{ marginTop: 20 }}>
