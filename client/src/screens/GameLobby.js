@@ -17,7 +17,12 @@ const GameLobby = () => {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (game && game.state === 'started') {
+    if (
+      game &&
+      game.state === 'started' &&
+      game.players &&
+      game.players.find(p => p.name === playerName)?.hand?.length > 0
+    ) {
       navigate('/game', { state: { gameId, playerName } });
     }
   }, [game, gameId, playerName, navigate]);

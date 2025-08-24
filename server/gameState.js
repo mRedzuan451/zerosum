@@ -69,16 +69,29 @@ function startGame(gameId) {
   game.roundActions = {};
 
   // Deal cards to all players
-  // For demo: use numbers 1-7, shuffle and deal 5 cards each
-  const deck = [...Array(28).keys()].map(i => (i % 7) + 1); // 4 sets of 1-7
+  // Numbers: 1-7 (4 sets each), Operands: +, -, x (8 of each)
+  const numberCards = [];
+  for (let i = 1; i <= 7; i++) {
+    for (let j = 0; j < 4; j++) {
+      numberCards.push({ type: 'number', value: i });
+    }
+  }
+  const operandList = ['+', '-', 'x'];
+  const operandCards = [];
+  for (let op of operandList) {
+    for (let j = 0; j < 8; j++) {
+      operandCards.push({ type: 'operand', value: op });
+    }
+  }
+  const deck = [...numberCards, ...operandCards];
   for (let i = deck.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [deck[i], deck[j]] = [deck[j], deck[i]];
   }
   game.players.forEach((p, idx) => {
-    p.hand = deck.slice(idx * 5, idx * 5 + 5);
+    p.hand = deck.slice(idx * 7, idx * 7 + 7); // Deal 7 cards each (numbers + operands)
   });
-  game.deck = deck.slice(game.players.length * 5); // Remaining deck
+  game.deck = deck.slice(game.players.length * 7); // Remaining deck
 
   return game;
 }

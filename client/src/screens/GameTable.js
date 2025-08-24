@@ -71,26 +71,60 @@ const GameTable = () => {
   return (
     <div>
       <h2 style={{ color: '#0ff', textShadow: '0 0 8px #0ff' }}>Game Table</h2>
+      {/* Selected card boxes */}
+      {game && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: 24 }}>
+          {Array.from({ length: game.mode === 'pro' ? 6 : 3 }).map((_, i) => {
+            const cardIdx = selectedCards[i];
+            const card = cardIdx !== undefined && game.players.find(p => p.name === playerName)?.hand?.[cardIdx];
+            return (
+              <div
+                key={i}
+                style={{
+                  width: '60px',
+                  height: '60px',
+                  background: card ? (card.type === 'operand' ? '#444' : '#222') : '#111',
+                  color: card ? (card.type === 'operand' ? '#ff0' : '#0ff') : '#555',
+                  border: card ? (card.type === 'operand' ? '2px dashed #ff0' : '2px solid #0ff') : '2px solid #333',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  lineHeight: '60px',
+                  fontSize: '2em',
+                  boxShadow: card ? '0 0 10px #0ff' : 'none',
+                }}
+              >
+                {card ? card.value : ''}
+              </div>
+            );
+          })}
+        </div>
+      )}
       <div>
         <h3 style={{ color: '#fff' }}>Your Hand</h3>
         {game && game.players && playerName && (
           game.players.find(p => p.name === playerName)?.hand?.length > 0 ? (
             <div>
-              {game.players.find(p => p.name === playerName).hand.map((num, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    ...cardStyle,
-                    background: selectedCards.includes(num) ? '#0ff' : '#222',
-                    color: selectedCards.includes(num) ? '#222' : '#0ff',
-                    cursor: 'pointer',
-                    display: 'inline-block',
-                  }}
-                  onClick={() => handleCardClick(num)}
-                >
-                  {num}
-                </div>
-              ))}
+              {game.players.find(p => p.name === playerName).hand.map((card, idx) => {
+                const isSelected = selectedCards.includes(idx);
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      ...cardStyle,
+                      background: isSelected ? '#0ff' : (card.type === 'operand' ? '#444' : '#222'),
+                      color: isSelected ? '#222' : (card.type === 'operand' ? '#ff0' : '#0ff'),
+                      border: card.type === 'operand' ? '2px dashed #ff0' : '2px solid #0ff',
+                      cursor: 'pointer',
+                      display: 'inline-block',
+                    }}
+                    onClick={() => {
+                      setSelectedCards(prev => prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]);
+                    }}
+                  >
+                    {card.value}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div style={{ color: '#f00' }}>No cards in hand.</div>
