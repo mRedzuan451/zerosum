@@ -129,8 +129,16 @@ function playerPass(gameId, playerName) {
 function playerRecalculate(gameId, playerName, discardCards) {
   const game = games[gameId];
   if (!game || game.state !== 'started') return null;
+  const player = game.players.find(p => p.name === playerName);
+  if (!player || !Array.isArray(player.hand)) return null;
+  // Remove discarded cards from hand
+  if (discardCards.length !== 2) return null; // Must discard exactly 2 cards
+  const newHand = player.hand.filter((_, idx) => !discardCards.includes(idx));
+  // Draw 1 new card from deck
+  const drawn = game.deck.splice(0, 1);
+  player.hand = [...newHand, ...drawn];
   game.roundActions = game.roundActions || {};
-  game.roundActions[playerName] = { action: 'recalculate', discardCards };
+  game.roundActions[playerName] = { action: 'recalculate', discardCards, drawn };
   return game;
 }
 

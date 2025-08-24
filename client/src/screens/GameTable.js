@@ -85,9 +85,10 @@ const GameTable = () => {
   };
 
   const handleRecalculate = async () => {
-    if (!gameId || !playerName || selectedCards.length === 0) return alert('Fill all fields');
-    const res = await recalculateAction(gameId, playerName, selectedCards);
-    setResult(JSON.stringify(res, null, 2));
+  if (!gameId || !playerName) return alert('Fill all fields');
+  if (selectedCards.length !== 2) return alert('You must select exactly 2 cards to discard for recalculate.');
+  const res = await recalculateAction(gameId, playerName, selectedCards);
+  setResult(JSON.stringify(res, null, 2));
   };
 
   return (
