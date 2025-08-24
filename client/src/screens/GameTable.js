@@ -31,6 +31,28 @@ const GameTable = () => {
   const [playerName, setPlayerName] = useState(location.state?.playerName || '');
   const [result, setResult] = useState('');
   const [game, setGame] = useState(null);
+  const [calcResult, setCalcResult] = useState('');
+
+  useEffect(() => {
+    if (game && game.mode === 'junior' && selectedCards.length === 3) {
+      const hand = game.players.find(p => p.name === playerName)?.hand || [];
+      const selected = selectedCards.map(idx => hand[idx]);
+      // Only calculate if 2 numbers and 1 operand are selected
+      const numbers = selected.filter(c => c.type === 'number');
+      const operand = selected.find(c => c.type === 'operand');
+      if (numbers.length === 2 && operand) {
+        let result = '';
+        if (operand.value === '+') result = numbers[0].value + numbers[1].value;
+        else if (operand.value === '-') result = numbers[0].value - numbers[1].value;
+        else if (operand.value === 'x') result = numbers[0].value * numbers[1].value;
+        setCalcResult(result);
+      } else {
+        setCalcResult('');
+      }
+    } else {
+      setCalcResult('');
+    }
+  }, [selectedCards, game, playerName]);
   // Poll game state every 2 seconds for real-time opponent status
   useEffect(() => {
     if (!gameId) return;
@@ -71,6 +93,24 @@ const GameTable = () => {
   return (
     <div>
       <h2 style={{ color: '#0ff', textShadow: '0 0 8px #0ff' }}>Game Table</h2>
+      {/* Calculation Result Box */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+        <div style={{
+          width: '120px',
+          height: '60px',
+          background: '#222',
+          color: '#0ff',
+          border: '2px solid #0ff',
+          borderRadius: '8px',
+          textAlign: 'center',
+          lineHeight: '60px',
+          fontSize: '2em',
+          boxShadow: '0 0 10px #0ff',
+          margin: '0 auto',
+        }}>
+          {game && game.mode === 'junior' && calcResult !== '' ? calcResult : ''}
+        </div>
+      </div>
       {/* Selected card boxes */}
       {game && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginBottom: 24 }}>

@@ -45,7 +45,7 @@ function joinGameByCode(roomCode, playerName) {
   const game = Object.values(games).find(g => g.roomCode === roomCode);
   if (!game) return null;
   if (!game.players.find(p => p.name === playerName)) {
-    game.players.push({ name: playerName, score: 0, ready: false });
+    game.players.push({ name: playerName, score: 0, ready: false, hand: [] });
   }
   return game;
 }
@@ -54,7 +54,7 @@ function joinGame(gameId, playerName) {
   const game = games[gameId];
   if (!game) return null;
   if (game.players.find(p => p.name === playerName)) return game;
-  game.players.push({ name: playerName, score: 0, ready: false });
+  game.players.push({ name: playerName, score: 0, ready: false, hand: [] });
   return game;
 }
 
@@ -69,18 +69,23 @@ function startGame(gameId) {
   game.roundActions = {};
 
   // Deal cards to all players
-  // Numbers: 1-7 (4 sets each), Operands: +, -, x (8 of each)
+  // Use 1 deck for up to 4 players, 2 decks for more than 4 players
+  const deckCount = game.players.length > 4 ? 2 : 1;
   const numberCards = [];
-  for (let i = 1; i <= 7; i++) {
-    for (let j = 0; j < 4; j++) {
-      numberCards.push({ type: 'number', value: i });
+  for (let d = 0; d < deckCount; d++) {
+    for (let i = 1; i <= 7; i++) {
+      for (let j = 0; j < 4; j++) {
+        numberCards.push({ type: 'number', value: i });
+      }
     }
   }
   const operandList = ['+', '-', 'x'];
   const operandCards = [];
-  for (let op of operandList) {
-    for (let j = 0; j < 8; j++) {
-      operandCards.push({ type: 'operand', value: op });
+  for (let d = 0; d < deckCount; d++) {
+    for (let op of operandList) {
+      for (let j = 0; j < 8; j++) {
+        operandCards.push({ type: 'operand', value: op });
+      }
     }
   }
   const deck = [...numberCards, ...operandCards];
@@ -89,7 +94,7 @@ function startGame(gameId) {
     [deck[i], deck[j]] = [deck[j], deck[i]];
   }
   game.players.forEach((p, idx) => {
-    p.hand = deck.slice(idx * 7, idx * 7 + 7); // Deal 7 cards each (numbers + operands)
+    p.hand = deck.slice(idx * 7, idx * 7 + 7); // Deal 7 card objects each (numbers + operands)
   });
   game.deck = deck.slice(game.players.length * 7); // Remaining deck
 
