@@ -57,6 +57,13 @@ const GameLobby = () => {
     try {
       const result = await startGame(gameId);
       setGame(result);
+      // Force refresh: fetch latest game state after starting
+      setTimeout(async () => {
+        try {
+          const refreshed = await getGameState(gameId);
+          setGame(refreshed);
+        } catch (e) {}
+      }, 300); // short delay to allow backend to update
     } catch (e) {
       setError('Failed to start game');
     }

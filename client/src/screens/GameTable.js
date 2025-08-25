@@ -111,7 +111,7 @@ const GameTable = () => {
   return (
     <div>
       <h2 style={{ color: '#0ff', textShadow: '0 0 8px #0ff' }}>Game Table</h2>
-      {/* Target Value Display */}
+      {/* Target Cards and Result Display */}
       {game && (
         <div style={{
           background: '#111',
@@ -120,12 +120,45 @@ const GameTable = () => {
           borderRadius: '10px',
           padding: '16px',
           margin: '0 auto 24px auto',
-          maxWidth: '320px',
+          maxWidth: '420px',
           textAlign: 'center',
           boxShadow: '0 0 10px #0ff',
         }}>
-          <div style={{ fontSize: '1.2em', fontWeight: 'bold', marginBottom: 8 }}>Target Value</div>
-          <div style={{ fontSize: '2em', marginBottom: 8 }}>{game.targetValue}</div>
+          <div style={{ fontSize: '1.2em', fontWeight: 'bold', marginBottom: 8 }}>Target</div>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginBottom: 8 }}>
+            {game.targetCards && game.targetCards.map((card, idx) => (
+              <div key={idx} style={{
+                width: '60px',
+                height: '60px',
+                background: card.type === 'operand' ? '#444' : '#222',
+                color: '#fff', // High contrast white font
+                border: card.type === 'operand' ? '2px dashed #ff0' : '2px solid #0ff',
+                borderRadius: '8px',
+                textAlign: 'center',
+                lineHeight: '60px',
+                fontSize: '2em',
+                fontWeight: 'bold',
+                boxShadow: '0 0 10px #0ff',
+              }}>{card.value}</div>
+            ))}
+            <span style={{ fontSize: '2em', color: '#fff', margin: '0 8px' }}>&rarr;</span>
+            <div style={{
+              width: '60px',
+              height: '60px',
+              background: '#0ff',
+              color: '#111', // Very dark font for contrast on cyan
+              border: '2px solid #0ff',
+              borderRadius: '8px',
+              textAlign: 'center',
+              lineHeight: '60px',
+              fontSize: '2em',
+              fontWeight: 'bold',
+              boxShadow: '0 0 10px #0ff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>{game.targetValue !== undefined && game.targetValue !== null && game.targetValue !== '' ? game.targetValue : <span style={{color:'#f00', fontSize:'1em'}}>?</span>}</div>
+          </div>
           {game.targetEquation && (
             <div style={{ fontSize: '1em', color: '#fff' }}>Equation: <b>{game.targetEquation}</b></div>
           )}

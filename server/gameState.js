@@ -60,44 +60,6 @@ function joinGame(gameId, playerName) {
 
 
 function startGame(gameId) {
-  // Set target value for all players to see
-  if (game.mode === 'junior') {
-    // Draw 2 number cards and 1 operand card from deck
-    let numbers = [];
-    let operand = null;
-    let tries = 0;
-    while (numbers.length < 2 && tries < 100) {
-      const card = game.deck.shift();
-      if (card && card.type === 'number') numbers.push(card.value);
-      else if (card && card.type === 'operand' && !operand) operand = card.value;
-      tries++;
-    }
-    // If not enough, fallback to random
-    if (numbers.length < 2 || !operand) {
-      numbers = [Math.floor(Math.random() * 7) + 1, Math.floor(Math.random() * 7) + 1];
-      operand = ['+', '-', 'x'][Math.floor(Math.random() * 3)];
-    }
-    let result = 0;
-    if (operand === '+') result = numbers[0] + numbers[1];
-    else if (operand === '-') result = Math.abs(numbers[0] - numbers[1]);
-    else if (operand === 'x') result = numbers[0] * numbers[1];
-    game.targetValue = result;
-    game.targetEquation = `${numbers[0]} ${operand} ${numbers[1]}`;
-  } else {
-    // Pro mode: combine 2 number cards as string
-    let nums = [];
-    let tries = 0;
-    while (nums.length < 2 && tries < 100) {
-      const card = game.deck.shift();
-      if (card && card.type === 'number') nums.push(card.value);
-      tries++;
-    }
-    if (nums.length < 2) {
-      nums = [Math.floor(Math.random() * 7) + 1, Math.floor(Math.random() * 7) + 1];
-    }
-    game.targetValue = Number(`${nums[0]}${nums[1]}`);
-    game.targetEquation = `${nums[0]}${nums[1]}`;
-  }
   const game = games[gameId];
   if (!game || game.state !== 'waiting') return null;
   // Only allow start if all players are ready
@@ -135,6 +97,67 @@ function startGame(gameId) {
     p.hand = deck.slice(idx * 7, idx * 7 + 7); // Deal 7 card objects each (numbers + operands)
   });
   game.deck = deck.slice(game.players.length * 7); // Remaining deck
+
+  // Set target value and target cards for all players to see
+  if (game.mode === 'junior') {
+    // Draw 2 number cards and 1 operand card from deck
+    let numbers = [];
+    let operand = null;
+    let tries = 0;
+    let targetCards = [];
+    while (numbers.length < 2 && tries < 100) {
+      const card = game.deck.shift();
+      if (card && card.type === 'number') {
+        numbers.push(card.value);
+        targetCards.push({ type: 'number', value: card.value });
+      }
+      else if (card && card.type === 'operand' && !operand) {
+        operand = card.value;
+        targetCards.push({ type: 'operand', value: card.value });
+      }
+      tries++;
+    }
+    // If not enough, fallback to random
+    if (numbers.length < 2 || !operand) {
+      numbers = [Math.floor(Math.random() * 7) + 1, Math.floor(Math.random() * 7) + 1];
+      operand = ['+', '-', 'x'][Math.floor(Math.random() * 3)];
+      targetCards = [
+        { type: 'number', value: numbers[0] },
+        { type: 'operand', value: operand },
+        { type: 'number', value: numbers[1] }
+      ];
+    }
+    let result = 0;
+    if (operand === '+') result = numbers[0] + numbers[1];
+    else if (operand === '-') result = Math.abs(numbers[0] - numbers[1]);
+    else if (operand === 'x') result = numbers[0] * numbers[1];
+    game.targetValue = result;
+    game.targetEquation = `${numbers[0]} ${operand} ${numbers[1]}`;
+    game.targetCards = targetCards;
+  } else {
+    // Pro mode: combine 2 number cards as string
+    let nums = [];
+    let tries = 0;
+    let targetCards = [];
+    while (nums.length < 2 && tries < 100) {
+      const card = game.deck.shift();
+      if (card && card.type === 'number') {
+        nums.push(card.value);
+        targetCards.push({ type: 'number', value: card.value });
+      }
+      tries++;
+    }
+    if (nums.length < 2) {
+      nums = [Math.floor(Math.random() * 7) + 1, Math.floor(Math.random() * 7) + 1];
+      targetCards = [
+        { type: 'number', value: nums[0] },
+        { type: 'number', value: nums[1] }
+      ];
+    }
+    game.targetValue = Number(`${nums[0]}${nums[1]}`);
+    game.targetEquation = `${nums[0]}${nums[1]}`;
+    game.targetCards = targetCards;
+  }
 
   return game;
 }
