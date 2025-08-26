@@ -60,6 +60,13 @@ function joinGame(gameId, playerName) {
 
 
 function startGame(gameId) {
+  // Set up turn-based play
+  game.currentTurn = 0; // index of current player
+  // Deal one extra card to the first player for their turn
+  const firstPlayer = game.players[game.currentTurn];
+  if (game.deck.length > 0) {
+    firstPlayer.hand.push(game.deck.shift());
+  }
   console.log('startGame called for gameId:', gameId);
   const game = games[gameId];
   if (!game || game.state !== 'waiting') return null;
@@ -175,8 +182,18 @@ function setPlayerReady(gameId, playerName, ready) {
 function playerCommit(gameId, playerName, cards, equation) {
   const game = games[gameId];
   if (!game || game.state !== 'started') return null;
+  // Only allow current player to commit
+  const currentPlayer = game.players[game.currentTurn];
+  if (currentPlayer.name !== playerName) return null;
   game.roundActions = game.roundActions || {};
   game.roundActions[playerName] = { action: 'commit', cards, equation };
+  // Advance turn
+  game.currentTurn = (game.currentTurn + 1) % game.players.length;
+  // Deal one card to next player
+  const nextPlayer = game.players[game.currentTurn];
+  if (game.deck.length > 0) {
+    nextPlayer.hand.push(game.deck.shift());
+  }
   return game;
 }
 

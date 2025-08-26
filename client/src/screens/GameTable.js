@@ -23,6 +23,8 @@ const cardStyle = {
 
 
 const GameTable = () => {
+  // Determine if it's the current player's turn
+  const isMyTurn = game && game.players && typeof game.currentTurn === 'number' && game.players[game.currentTurn]?.name === playerName;
   // Recalculate discard selection state
   const [recalcMode, setRecalcMode] = useState(false);
   const [discardCards, setDiscardCards] = useState([]);
@@ -72,7 +74,8 @@ const GameTable = () => {
   }, [gameId]);
 
   const handleCardClick = (num) => {
-    setSelectedCards((prev) => prev.includes(num) ? prev.filter(n => n !== num) : [...prev, num]);
+  if (!isMyTurn) return;
+  setSelectedCards((prev) => prev.includes(num) ? prev.filter(n => n !== num) : [...prev, num]);
   };
 
   const handleCommit = async () => {
@@ -319,12 +322,12 @@ const GameTable = () => {
         )}
       </div>
       <div style={{ marginTop: 20 }}>
-        <input placeholder="Equation" value={equation} onChange={e => setEquation(e.target.value)} />
+        <input placeholder="Equation" value={equation} onChange={e => setEquation(e.target.value)} disabled={!isMyTurn} />
       </div>
       <div style={{ marginTop: 20 }}>
-        <button onClick={handleCommit} style={{ marginRight: 10 }}>Commit</button>
-        <button onClick={handlePass} style={{ marginRight: 10 }}>Pass</button>
-        <button onClick={handleRecalculate} style={{ marginRight: 10 }}>Recalculate</button>
+        <button onClick={handleCommit} style={{ marginRight: 10 }} disabled={!isMyTurn}>Commit</button>
+        <button onClick={handlePass} style={{ marginRight: 10 }} disabled={!isMyTurn}>Pass</button>
+        <button onClick={handleRecalculate} style={{ marginRight: 10 }} disabled={!isMyTurn}>Recalculate</button>
         <button
           onClick={() => {
             if (window.confirm('Are you sure you want to exit the game?')) {
