@@ -62,6 +62,7 @@ router.post('/game/joincode', (req, res) => {
 });
 // Start game
 router.post('/game/start', (req, res) => {
+  console.log('POST /game/start called with body:', req.body);
   const { gameId } = req.body;
   if (!gameId) return res.status(400).json({ error: 'gameId required' });
   const game = startGame(Number(gameId));

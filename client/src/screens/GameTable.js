@@ -76,9 +76,37 @@ const GameTable = () => {
   };
 
   const handleCommit = async () => {
-    if (!gameId || !playerName || selectedCards.length === 0 || !equation) return alert('Fill all fields');
-    const res = await commitAction(gameId, playerName, selectedCards, equation);
-    setResult(JSON.stringify(res, null, 2));
+    if (!gameId || !playerName) return alert('Missing game or player info');
+    // Validate selection for junior mode
+    if (game && game.mode === 'junior') {
+      if (selectedCards.length !== 3) return alert('Select 3 cards for your equation.');
+      const hand = game.players.find(p => p.name === playerName)?.hand || [];
+      const selected = selectedCards.map(idx => hand[idx]);
+      const numbers = selected.filter(c => c.type === 'number');
+      const operand = selected.find(c => c.type === 'operand');
+      if (numbers.length !== 2 || !operand) return alert('Select 2 numbers and 1 operand.');
+      // Auto-generate equation string
+      const eq = `${numbers[0].value} ${operand.value} ${numbers[1].value}`;
+      const res = await commitAction(gameId, playerName, selectedCards, eq);
+      setResult(JSON.stringify(res, null, 2));
+      // Refresh game state
+      try {
+        const fetchRes = await fetch(`http://localhost:3001/api/game/${gameId}`);
+        const data = await fetchRes.json();
+        setGame(data);
+      } catch (e) {}
+    } else if (game && game.mode === 'pro') {
+      if (selectedCards.length < 2) return alert('Select at least 2 cards for your equation.');
+      if (!equation) return alert('Enter your equation.');
+      const res = await commitAction(gameId, playerName, selectedCards, equation);
+      setResult(JSON.stringify(res, null, 2));
+      // Refresh game state
+      try {
+        const fetchRes = await fetch(`http://localhost:3001/api/game/${gameId}`);
+        const data = await fetchRes.json();
+        setGame(data);
+      } catch (e) {}
+    }
   };
 
   const handlePass = async () => {

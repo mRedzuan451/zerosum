@@ -60,6 +60,7 @@ function joinGame(gameId, playerName) {
 
 
 function startGame(gameId) {
+  console.log('startGame called for gameId:', gameId);
   const game = games[gameId];
   if (!game || game.state !== 'waiting') return null;
   // Only allow start if all players are ready
