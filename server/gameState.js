@@ -60,15 +60,8 @@ function joinGame(gameId, playerName) {
 
 
 function startGame(gameId) {
-  // Set up turn-based play
-  game.currentTurn = 0; // index of current player
-  // Deal one extra card to the first player for their turn
-  const firstPlayer = game.players[game.currentTurn];
-  if (game.deck.length > 0) {
-    firstPlayer.hand.push(game.deck.shift());
-  }
-  console.log('startGame called for gameId:', gameId);
   const game = games[gameId];
+  console.log('startGame called for gameId:', gameId);
   if (!game || game.state !== 'waiting') return null;
   // Only allow start if all players are ready
   if (!game.players.every(p => p.ready)) return null;
@@ -165,6 +158,14 @@ function startGame(gameId) {
     game.targetValue = Number(`${nums[0]}${nums[1]}`);
     game.targetEquation = `${nums[0]}${nums[1]}`;
     game.targetCards = targetCards;
+  }
+
+  // Set up turn-based play at the end
+  game.currentTurn = 0; // index of current player
+  // Deal one extra card to the first player for their turn
+  const firstPlayer = game.players[game.currentTurn];
+  if (game.deck.length > 0) {
+    firstPlayer.hand.push(game.deck.shift());
   }
 
   return game;

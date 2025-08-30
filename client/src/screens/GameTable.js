@@ -23,8 +23,6 @@ const cardStyle = {
 
 
 const GameTable = () => {
-  // Determine if it's the current player's turn
-  const isMyTurn = game && game.players && typeof game.currentTurn === 'number' && game.players[game.currentTurn]?.name === playerName;
   // Recalculate discard selection state
   const [recalcMode, setRecalcMode] = useState(false);
   const [discardCards, setDiscardCards] = useState([]);
@@ -37,6 +35,9 @@ const GameTable = () => {
   const [result, setResult] = useState('');
   const [game, setGame] = useState(null);
   const [calcResult, setCalcResult] = useState('');
+
+  // Determine if it's the current player's turn
+  const isMyTurn = game && game.players && typeof game.currentTurn === 'number' && game.players[game.currentTurn]?.name === playerName;
 
   useEffect(() => {
     if (game && game.mode === 'junior' && selectedCards.length === 3) {
